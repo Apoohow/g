@@ -33,7 +33,7 @@ const samplePolicy: InsurancePolicy = {
   coverage: 10000,
   deductible: 500,
   insuranceType: ['智能合約漏洞', '預言機攻擊保險'],
-  claimMechanism: ['DAO 治理投票審核', '鏈上驗證系統'],
+  claimMechanism: ['鏈上驗證系統'],
 
   coverageItems: [
     '智能合約漏洞（如邏輯錯誤、Reentrancy 攻擊等）',
@@ -54,17 +54,30 @@ const samplePolicy: InsurancePolicy = {
   ],
 
   claimProcedure: {
-    reportingPeriod: 7,
-    requiredDocuments: [
-      '協議名稱與事件時間',
-      '損失金額估算',
-      '錢包地址與交易紀錄 hash'
-    ],
-    verificationSources: ['Chainalysis', 'Blocksec'],
-    daoVoting: {
-      threshold: 60,
-      period: 7,
-      passRate: 50
+    submission: {
+      description: '使用者提出理賠申請，可由保單持有人或第三方通報人（如白帽駭客、監控機構）提出，並透過 DApp 介面填寫事件資料。',
+      requiredDocuments: [
+        '協議名稱與事件時間',
+        '損失金額估算',
+        '錢包地址與交易紀錄 hash',
+        '資產損失說明'
+      ],
+      onChainRecord: '提交即產生一筆鏈上交易，保留索賠記錄與時間戳'
+    },
+    review: {
+      waitingPeriod: '設有等待期（如 7～14 天冷卻期），避免詐騙或操控',
+      verificationAgency: '由區塊鏈監控服務（如 Chainalysis、OpenZeppelin）初步驗證損失事件',
+      lossVerification: '分析該地址的資產變化是否符合損失條件'
+    },
+    execution: {
+      decision: '由保險機構內部審核判斷',
+      payout: '通過則自動撥款至錢包，未通過則拒賠或可申訴仲裁',
+      transparency: '所有理賠記錄與評估報告皆上鏈，永久可查'
+    },
+    adjustment: {
+      overLoss: '若單次理賠損耗大量資金，系統可啟動再保險或儲備池補充資金池',
+      premiumAdjustment: '根據事件嚴重性調整保費，調整該協議保費（自動化模型）',
+      policyPause: '高風險協議可能暫時下架或重新審核'
     }
   },
 
@@ -79,7 +92,7 @@ const samplePolicy: InsurancePolicy = {
   },
 
   signatures: {
-    dao: {
+    insurer: {
       address: '0xDEF456...',
       timestamp: '2025/04/30 20:00'
     },
@@ -95,7 +108,7 @@ export const PolicyDetails: React.FC = () => {
     <Container maxW="container.lg" py={10}>
       <VStack spacing={8} align="stretch">
         <Heading as="h1" size="xl" textAlign="center">
-          DeFiSafe 數位資產協議風險保險契約
+          DeFiSure 數位資產協議風險保險契約
         </Heading>
 
         {/* 基本資料 */}
@@ -107,7 +120,7 @@ export const PolicyDetails: React.FC = () => {
             <Tbody>
               <Tr>
                 <Th>保險公司</Th>
-                <Td>DeFiSafe DAO</Td>
+                <Td>DeFiSure DAO</Td>
               </Tr>
               <Tr>
                 <Th>保單編號</Th>
@@ -185,25 +198,40 @@ export const PolicyDetails: React.FC = () => {
           <VStack spacing={4} align="stretch">
             <Box>
               <Text fontSize="lg" fontWeight="bold" mb={2}>
-                出險申報期限
+                1. 出險通報
               </Text>
-              <Text>出險後 {samplePolicy.claimProcedure.reportingPeriod} 日內</Text>
-            </Box>
-            <Box>
-              <Text fontSize="lg" fontWeight="bold" mb={2}>
-                所需文件
-              </Text>
+              <Text>{samplePolicy.claimProcedure.submission.description}</Text>
+              <Text mt={2} fontWeight="bold">所需文件：</Text>
               <List spacing={2}>
-                {samplePolicy.claimProcedure.requiredDocuments.map((doc, index) => (
+                {samplePolicy.claimProcedure.submission.requiredDocuments.map((doc, index) => (
                   <ListItem key={index}>{doc}</ListItem>
                 ))}
               </List>
+              <Text mt={2}>{samplePolicy.claimProcedure.submission.onChainRecord}</Text>
             </Box>
             <Box>
               <Text fontSize="lg" fontWeight="bold" mb={2}>
-                驗證來源
+                2. 驗證與暫停期
               </Text>
-              <Text>{samplePolicy.claimProcedure.verificationSources.join('、')}</Text>
+              <Text>等待期設計：{samplePolicy.claimProcedure.review.waitingPeriod}</Text>
+              <Text>預驗證機構：{samplePolicy.claimProcedure.review.verificationAgency}</Text>
+              <Text>損失驗證：{samplePolicy.claimProcedure.review.lossVerification}</Text>
+            </Box>
+            <Box>
+              <Text fontSize="lg" fontWeight="bold" mb={2}>
+                3. 理賠決議與執行
+              </Text>
+              <Text>決策方式：{samplePolicy.claimProcedure.execution.decision}</Text>
+              <Text>賠付執行：{samplePolicy.claimProcedure.execution.payout}</Text>
+              <Text>資訊透明：{samplePolicy.claimProcedure.execution.transparency}</Text>
+            </Box>
+            <Box>
+              <Text fontSize="lg" fontWeight="bold" mb={2}>
+                4. 資金池調整與再保險啟動
+              </Text>
+              <Text>損失超過預期：{samplePolicy.claimProcedure.adjustment.overLoss}</Text>
+              <Text>保費機制調整：{samplePolicy.claimProcedure.adjustment.premiumAdjustment}</Text>
+              <Text>保單暫停：{samplePolicy.claimProcedure.adjustment.policyPause}</Text>
             </Box>
           </VStack>
         </Box>
@@ -218,9 +246,9 @@ export const PolicyDetails: React.FC = () => {
           <Grid templateColumns="repeat(2, 1fr)" gap={6}>
             <GridItem>
               <Box p={4} borderWidth={1} borderRadius="md">
-                <Text fontWeight="bold">DeFiSafe DAO（發行保險人）</Text>
-                <Text>地址：{samplePolicy.signatures.dao.address}</Text>
-                <Text>簽署時間：{samplePolicy.signatures.dao.timestamp}</Text>
+                <Text fontWeight="bold">DeFiSure（發行保險人）</Text>
+                <Text>地址：{samplePolicy.signatures.insurer.address}</Text>
+                <Text>簽署時間：{samplePolicy.signatures.insurer.timestamp}</Text>
                 <Badge colorScheme="green" mt={2}>已簽署</Badge>
               </Box>
             </GridItem>

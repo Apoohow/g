@@ -18,15 +18,27 @@ export interface InsurancePolicy {
   // 不保事項
   exclusions: string[];
 
-  // 理賠流程
+  // 理賠流程（四步驟）
   claimProcedure: {
-    reportingPeriod: number;
-    requiredDocuments: string[];
-    verificationSources: string[];
-    daoVoting: {
-      threshold: number;
-      period: number;
-      passRate: number;
+    submission: {
+      description: string;
+      requiredDocuments: string[];
+      onChainRecord: string;
+    };
+    review: {
+      waitingPeriod: string;
+      verificationAgency: string;
+      lossVerification: string;
+    };
+    execution: {
+      decision: string;
+      payout: string;
+      transparency: string;
+    };
+    adjustment: {
+      overLoss: string;
+      premiumAdjustment: string;
+      policyPause: string;
     };
   };
 
@@ -43,7 +55,7 @@ export interface InsurancePolicy {
 
   // 簽署資訊
   signatures: {
-    dao: {
+    insurer: {
       address: string;
       timestamp: string;
     };

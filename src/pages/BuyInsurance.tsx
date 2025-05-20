@@ -80,7 +80,7 @@ export const BuyInsurance: React.FC = () => {
     coverage: parseFloat(amount) || 10000,
     deductible: 500,
     insuranceType: ['智能合約漏洞', '預言機攻擊保險'],
-    claimMechanism: ['DAO 治理投票審核', '鏈上驗證系統'],
+    claimMechanism: ['鏈上驗證系統'],
     coverageItems: [
       '智能合約漏洞（如邏輯錯誤、Reentrancy 攻擊等）',
       '預言機攻擊（Oracle manipulation）導致價格失真與清算損失',
@@ -98,17 +98,30 @@ export const BuyInsurance: React.FC = () => {
       '區塊鏈停機、硬分岔或極端天災等不可抗力'
     ],
     claimProcedure: {
-      reportingPeriod: 7,
-      requiredDocuments: [
-        '協議名稱與事件時間',
-        '損失金額估算',
-        '錢包地址與交易紀錄 hash'
-      ],
-      verificationSources: ['Chainalysis', 'Blocksec'],
-      daoVoting: {
-        threshold: 60,
-        period: 7,
-        passRate: 50
+      submission: {
+        description: '使用者提出理賠申請，可由保單持有人或第三方通報人（如白帽駭客、監控機構）提出，並透過 DApp 介面填寫事件資料。',
+        requiredDocuments: [
+          '協議名稱與事件時間',
+          '損失金額估算',
+          '錢包地址與交易紀錄 hash',
+          '資產損失說明'
+        ],
+        onChainRecord: '提交即產生一筆鏈上交易，保留索賠記錄與時間戳'
+      },
+      review: {
+        waitingPeriod: '設有等待期（如 7～14 天冷卻期），避免詐騙或操控',
+        verificationAgency: '由區塊鏈監控服務（如 Chainalysis、OpenZeppelin）初步驗證損失事件',
+        lossVerification: '分析該地址的資產變化是否符合損失條件'
+      },
+      execution: {
+        decision: '由保險機構內部審核判斷',
+        payout: '通過則自動撥款至錢包，未通過則拒賠或可申訴仲裁',
+        transparency: '所有理賠記錄與評估報告皆上鏈，永久可查'
+      },
+      adjustment: {
+        overLoss: '若單次理賠損耗大量資金，系統可啟動再保險或儲備池補充資金池',
+        premiumAdjustment: '根據事件嚴重性調整保費，調整該協議保費（自動化模型）',
+        policyPause: '高風險協議可能暫時下架或重新審核'
       }
     },
     premiumCalculation: {
@@ -121,7 +134,7 @@ export const BuyInsurance: React.FC = () => {
       }
     },
     signatures: {
-      dao: {
+      insurer: {
         address: '0xDEF456...',
         timestamp: new Date().toLocaleString()
       },

@@ -47,7 +47,7 @@ export const ClaimRequest: React.FC = () => {
         </Heading>
 
         <Text fontSize="md" color="gray.600">
-          請提供您的保單資訊和損失詳情，我們將進行鏈上驗證和 DAO 投票審核。
+          請提供您的保單資訊和損失詳情，我們將進行鏈上驗證和審核。
         </Text>
 
         <Box as="form" onSubmit={handleSubmit}>
