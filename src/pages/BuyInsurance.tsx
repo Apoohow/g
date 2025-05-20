@@ -20,8 +20,9 @@ import {
   useDisclosure,
   HStack,
   Icon,
+  useMediaQuery,
 } from '@chakra-ui/react';
-import { PDFViewer } from '@react-pdf/renderer';
+import { PDFViewer, pdf } from '@react-pdf/renderer';
 import InsurancePDF from '../components/InsurancePDF';
 import { InsurancePolicy } from '../types/insurance';
 import { motion } from 'framer-motion';
@@ -36,6 +37,7 @@ export const BuyInsurance: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  const [isMobile] = useMediaQuery('(max-width: 768px)');
 
   const calculatePremium = (amount: string) => {
     const premium = parseFloat(amount) * 0.12;
@@ -143,6 +145,17 @@ export const BuyInsurance: React.FC = () => {
         timestamp: new Date().toLocaleString()
       }
     }
+  };
+
+  // PDF 下載功能
+  const handleDownloadPDF = async () => {
+    const blob = await pdf(<InsurancePDF policy={samplePolicy} />).toBlob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'DeFiSure-保單.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -262,9 +275,15 @@ export const BuyInsurance: React.FC = () => {
           </ModalHeader>
           <ModalCloseButton color="white" />
           <ModalBody>
-            <PDFViewer style={{ width: '100%', height: '100%' }}>
-              <InsurancePDF policy={samplePolicy} />
-            </PDFViewer>
+            {isMobile ? (
+              <Button colorScheme="blue" onClick={handleDownloadPDF} w="full" size="lg">
+                下載 PDF
+              </Button>
+            ) : (
+              <PDFViewer style={{ width: '100%', height: '100%' }}>
+                <InsurancePDF policy={samplePolicy} />
+              </PDFViewer>
+            )}
           </ModalBody>
         </ModalContent>
       </Modal>

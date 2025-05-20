@@ -71,18 +71,19 @@ const App: React.FC = () => {
                   <Link key={link.to} to={link.to} style={{ height: 64, display: 'flex', alignItems: 'center' }}>{link.label}</Link>
                 ))}
               </Box>
-              {/* 手機版漢堡選單按鈕 */}
-              <IconButton
-                aria-label="Open menu"
-                icon={<HamburgerIcon />}
-                display={{ base: 'flex', md: 'none' }}
-                onClick={onOpen}
-                variant="ghost"
-                color="white"
-                fontSize="2xl"
-                ml={2}
-              />
-              <Box style={{ width: 160 }} />
+              {/* 右側：手機版漢堡選單按鈕 */}
+              <Box display={{ base: 'flex', md: 'none' }} alignItems="center" justifyContent="flex-end" flex={1}>
+                <IconButton
+                  aria-label="Open menu"
+                  icon={<HamburgerIcon />}
+                  onClick={onOpen}
+                  variant="ghost"
+                  color="white"
+                  fontSize="2xl"
+                  ml={2}
+                />
+              </Box>
+              <Box style={{ width: 160 }} display={{ base: 'none', md: 'block' }} />
             </Box>
             {/* Drawer for mobile menu */}
             <Drawer placement="right" onClose={onClose} isOpen={isOpen} size="xs">
