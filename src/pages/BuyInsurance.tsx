@@ -21,6 +21,7 @@ import {
   HStack,
   Icon,
   useMediaQuery,
+  Checkbox,
 } from '@chakra-ui/react';
 import { PDFViewer, pdf } from '@react-pdf/renderer';
 import InsurancePDF from '../components/InsurancePDF';
@@ -38,6 +39,11 @@ export const BuyInsurance: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const [isMobile] = useMediaQuery('(max-width: 768px)');
+  const [statementRead, setStatementRead] = useState(false);
+  const { isOpen: isStatementOpen, onOpen: onStatementOpen, onClose: onStatementClose } = useDisclosure({
+    onClose: () => setStatementRead(true)
+  });
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const calculatePremium = (amount: string) => {
     const premium = parseFloat(amount) * 0.12;
@@ -63,6 +69,13 @@ export const BuyInsurance: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPendingSubmit(true);
+    onStatementOpen();
+  };
+
+  const handleAgreeAndSubmit = () => {
+    setPendingSubmit(false);
+    onStatementClose();
     toast({
       title: '保單購買成功',
       description: `已生成保單 NFT：DS#${Math.floor(Math.random() * 1000)}`,
@@ -77,7 +90,7 @@ export const BuyInsurance: React.FC = () => {
     insuredAddress: '0xABC123...',
     protocol: protocol || 'Aave Protocol',
     startDate: new Date().toLocaleDateString(),
-    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+    endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toLocaleDateString(),
     premium: parseFloat(premium) || 1284.73,
     coverage: parseFloat(amount) || 10000,
     deductible: 500,
@@ -235,29 +248,16 @@ export const BuyInsurance: React.FC = () => {
                 預覽保單內容
               </Button>
 
-              {!isConnected ? (
-                <Button
-                  leftIcon={<Icon as={WalletIcon} />}
-                  colorScheme="blue"
-                  onClick={connectWallet}
-                  w="100%"
-                  size="lg"
-                  variant="gradient"
-                >
-                  連接錢包
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  colorScheme="green"
-                  w="100%"
-                  size="lg"
-                  variant="gradient"
-                  isDisabled={!protocol || !amount}
-                >
-                  購買保險
-                </Button>
-              )}
+              <Button
+                type="submit"
+                colorScheme="green"
+                w="100%"
+                size="lg"
+                variant="gradient"
+                isDisabled={!protocol || !amount}
+              >
+                購買保險
+              </Button>
             </VStack>
           </Box>
         </MotionBox>
@@ -284,6 +284,39 @@ export const BuyInsurance: React.FC = () => {
                 <InsurancePDF policy={samplePolicy} />
               </PDFViewer>
             )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isStatementOpen} onClose={() => { setPendingSubmit(false); onStatementClose(); }} size="xl" scrollBehavior="inside">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>網路投保聲明事項</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Box fontSize="md" mb={4} fontWeight="bold">一、要保人與被保險人聲明事項</Box>
+            <Box mb={2}>本人已審閱並瞭解貴公司（<b>DeFiSure股份有限公司</b>）所提供之「投保須知」，另依「個人資料保護法」第八條第一項規定，已知悉 DeFiSure 蒐集、處理及利用本人個人資料之目的與方式。</Box>
+            <Box mb={2}>本人了解並同意 DeFiSure 依個人資料保護法規定，在特定目的範圍內，對本人（包含要保人與被被保險人）之個人資料進行蒐集、處理與利用。</Box>
+            <Box mb={2}>本人已於投保前審閱並知悉 DeFiSure 保險商品之「要保書」、「保單條款」及「投保須知」，可透過官方網站查閱或聯絡客服取得。本人已保有合理審閱時間，確認了解並同意相關條件與內容。</Box>
+            <Box mb={2} color="red.500">※DeFiSure 保留最終是否承保之權利。其他未載明事項，悉依保單條款辦理。</Box>
+            <Box mb={2} color="red.500">※若需參考其他保險商品資訊，請至官方網站或洽詢客服人員。</Box>
+            <Box mb={4} color="red.500">※本人（要保人）已確認瞭解 DeFiSure 所履行之個人資料保護法告知義務，並已詳閱相關聲明內容。</Box>
+            <Box fontSize="md" mb={4} fontWeight="bold">二、本公司聲明事項</Box>
+            <Box mb={2}>■ 本保險商品已由本公司合格審查人員審核，內容符合保險精算原則與法令規範。惟為保障消費者權益，建議保戶詳閱保單條款與相關文件，審慎選擇適合商品。若有任何虛偽、錯誤或違法資訊，將由本公司及相關人員依法負責。</Box>
+            <Box mb={2}>■ 保險契約中所有權利與義務，均載明於保單條款，請務必詳加閱讀與理解。</Box>
+            <Box mb={2}>■ 要保書所含之提醒欄位（如強制險等），僅供保戶自我檢核保障完整性，實際強制責任保險訂定仍依現行法規辦理。</Box>
+            <Box mb={4}>■ 保單核保通過後，本公司將進行隨機抽樣之「電話訪問」，以再次確認投保意願。保單與收據將於核保完成後三個工作天內寄發，若於十個工作天內未收到，請聯絡 DeFiSure 客服中心辦理。</Box>
+            <Box fontSize="md" mb={4} fontWeight="bold">三、履行個資法告知義務內容</Box>
+            <Box mb={2}><b>一、蒐集之目的</b><br/>（一）財產保險（代碼：093）<br/>（二）風險評估、理賠與保單管理（代碼：181）<br/>（三）DeFi 保險科技應用與分析目的</Box>
+            <Box mb={2}><b>二、蒐集之個人資料類別</b><br/>一般資料（如姓名、身分證號、聯絡方式、錢包地址、職業、投保金額）<br/>特殊資料（如健康資訊或駭客事件相關紀錄，若理賠需用者）</Box>
+            <Box mb={2}><b>三、個人資料來源（間接蒐集適用）</b><br/>（一）要保人 / 被保險人本人<br/>（二）區塊鏈交易紀錄、DApp 操作記錄<br/>（三）協助處理理賠之第三方單位（如安全審計、鏈上分析商）<br/>（四）醫療單位（如與人身保險商品有關）<br/>（五）政府開放資料平台與執法機關（依法配合時）</Box>
+            <Box mb={2}><b>四、個人資料之利用期間、對象、地區、方式</b><br/>（一）期間：保險契約存續期間及依法須保存之期間<br/>（二）對象：本公司內部單位、再保單位、合作區塊鏈驗證機構（如 Chainalysis）、保險公會及依法有權機關<br/>（三）地區：上述單位所在地（包含境外智能合約伺服器所在國）<br/>（四）方式：依據法令規定與資訊安全措施進行電子化或紙本利用</Box>
+            <Box mb={2}><b>五、依個資法第 3 條，您得行使以下權利</b><br/>查詢或請求閱覽本人資料<br/>請求補充、更正或刪除資料<br/>請求停止蒐集、處理或利用本人資料<br/>如需行使上述權利，請來信至客服信箱：support@defisure.io</Box>
+            <Box mb={2}><b>六、不提供資料之可能影響</b><br/>若您未提供必要資料，將可能導致本公司無法完成保單承保、續保或理賠程序，進而影響您的保障權益。</Box>
+            <Box mb={2}>本告知聲明事項已公布於官方網站：<a href="https://g-two-sigma.vercel.app/" target="_blank" rel="noopener noreferrer">https://g-two-sigma.vercel.app/</a> ，您可隨時查閱。如有疑問，歡迎洽詢客服專線：0800-XXX-XXX</Box>
+            <Button colorScheme="blue" w="full" mt={4} onClick={handleAgreeAndSubmit} isDisabled={!pendingSubmit}>
+              我已閱讀並同意，繼續購買保險
+            </Button>
           </ModalBody>
         </ModalContent>
       </Modal>
