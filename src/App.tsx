@@ -1,5 +1,6 @@
 import React from 'react';
-import { ChakraProvider, Box } from '@chakra-ui/react';
+import { ChakraProvider, Box, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerBody, useDisclosure } from '@chakra-ui/react';
+import { HamburgerIcon } from '@chakra-ui/icons';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import BuyInsurance from './pages/BuyInsurance';
 import ClaimRequest from './pages/ClaimRequest';
@@ -46,7 +47,16 @@ const ProcessPage: React.FC = () => (
   </Box>
 );
 
+const NAV_LINKS = [
+  { to: '/', label: '購買保險' },
+  { to: '/claim', label: '申請理賠' },
+  { to: '/process', label: '理賠流程' },
+  { to: '/policy', label: '保單詳情' },
+];
+
 const App: React.FC = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <ChakraProvider theme={theme}>
       <Router>
@@ -55,23 +65,47 @@ const App: React.FC = () => {
           <Box as="nav" bg="brand.500" color="white" p={2} style={{ height: 64, minHeight: 64, position: 'relative', zIndex: 5 }}>
             <Box maxW="container.lg" mx="auto" display="flex" alignItems="center" gap={8} style={{ height: 64 }}>
               <Box style={{ width: 160 }} />
-              <Box display="flex" flex={1} justifyContent="center" alignItems="center" gap={8} height={64}>
-                <Link to="/" style={{ height: 64, display: 'flex', alignItems: 'center' }}>購買保險</Link>
-                <Link to="/claim" style={{ height: 64, display: 'flex', alignItems: 'center' }}>申請理賠</Link>
-                <Link to="/process" style={{ height: 64, display: 'flex', alignItems: 'center' }}>理賠流程</Link>
-                <Link to="/policy" style={{ height: 64, display: 'flex', alignItems: 'center' }}>保單詳情</Link>
+              {/* 桌機版選單 */}
+              <Box display={{ base: 'none', md: 'flex' }} flex={1} justifyContent="center" alignItems="center" gap={8} height={64}>
+                {NAV_LINKS.map(link => (
+                  <Link key={link.to} to={link.to} style={{ height: 64, display: 'flex', alignItems: 'center' }}>{link.label}</Link>
+                ))}
               </Box>
+              {/* 手機版漢堡選單按鈕 */}
+              <IconButton
+                aria-label="Open menu"
+                icon={<HamburgerIcon />}
+                display={{ base: 'flex', md: 'none' }}
+                onClick={onOpen}
+                variant="ghost"
+                color="white"
+                fontSize="2xl"
+                ml={2}
+              />
               <Box style={{ width: 160 }} />
             </Box>
+            {/* Drawer for mobile menu */}
+            <Drawer placement="right" onClose={onClose} isOpen={isOpen} size="xs">
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerBody p={0} bg="brand.500" color="white">
+                  <Box display="flex" flexDirection="column" alignItems="center" pt={8} gap={6}>
+                    {NAV_LINKS.map(link => (
+                      <Link key={link.to} to={link.to} style={{ fontSize: 20 }} onClick={onClose}>{link.label}</Link>
+                    ))}
+                  </Box>
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
           </Box>
-        </Box>
 
-        <Routes>
-          <Route path="/" element={<BuyInsurance />} />
-          <Route path="/claim" element={<ClaimRequest />} />
-          <Route path="/process" element={<ProcessPage />} />
-          <Route path="/policy" element={<PolicyDetails />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<BuyInsurance />} />
+            <Route path="/claim" element={<ClaimRequest />} />
+            <Route path="/process" element={<ProcessPage />} />
+            <Route path="/policy" element={<PolicyDetails />} />
+          </Routes>
+        </Box>
       </Router>
     </ChakraProvider>
   );
