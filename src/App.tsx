@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChakraProvider, Box, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerBody, useDisclosure } from '@chakra-ui/react';
-import { HamburgerIcon } from '@chakra-ui/icons';
+import { HamburgerIcon, ChatIcon } from '@chakra-ui/icons';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import BuyInsurance from './pages/BuyInsurance';
 import ClaimRequest from './pages/ClaimRequest';
 import PolicyDetails from './pages/PolicyDetails';
 import theme from './styles/theme';
+import AIChatbot from './components/AIChatbot';
+import { FaRegComments } from 'react-icons/fa';
+import { Modal, ModalOverlay, ModalContent, ModalBody } from '@chakra-ui/react';
 
 const ProcessPage: React.FC = () => (
   <Box maxW="container.md" mx="auto" py={10}>
@@ -56,6 +59,7 @@ const NAV_LINKS = [
 
 const App: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <ChakraProvider theme={theme}>
@@ -107,6 +111,33 @@ const App: React.FC = () => {
             <Route path="/policy" element={<PolicyDetails />} />
           </Routes>
         </Box>
+        {/* 浮動聊天按鈕 */}
+        <Box position="fixed" bottom={8} right={8} zIndex={9999}>
+          <Box
+            as="button"
+            onClick={() => setChatOpen(true)}
+            bg="blue.500"
+            borderRadius="full"
+            boxShadow="lg"
+            w="60px"
+            h="60px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            _hover={{ bg: 'blue.600' }}
+          >
+            <span><ChatIcon boxSize={8} color="white" /></span>
+          </Box>
+        </Box>
+        {/* 聊天視窗 Modal */}
+        <Modal isOpen={chatOpen} onClose={() => setChatOpen(false)} size="md" motionPreset="slideInBottom" isCentered>
+          <ModalOverlay />
+          <ModalContent p={0} borderRadius="xl" overflow="hidden">
+            <ModalBody p={0} bg="gray.50">
+              <AIChatbot />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
       </Router>
     </ChakraProvider>
   );
